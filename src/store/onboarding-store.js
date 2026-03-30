@@ -1,7 +1,11 @@
 const initialState = {
   currentStep: 0,
   preferences: [],
-  importedBooks: []
+  importedBooks: [],
+  recommendations: [],
+  recommendationsLoading: false,
+  recommendationsError: '',
+  onboardingComplete: false
 };
 
 function createStore() {

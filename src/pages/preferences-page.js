@@ -7,13 +7,19 @@ export const PreferencesPage = ({ state, onBack, onNext, onSelectPreferences }) 
   <section class="page">
     <ol-onboarding-step .step=${2} .total=${5}></ol-onboarding-step>
     <h2>Choose your interests</h2>
+    <p>Select at least one category to continue. Selected: ${state.preferences.length}</p>
     <ol-preference-selector
       .preferences=${state.preferences}
       @preferences-selected=${(event) => onSelectPreferences(event.detail)}
     ></ol-preference-selector>
     <div class="page-actions">
       <ol-button label="Back" @button-click=${onBack}></ol-button>
-      <ol-button label="Continue" primary @button-click=${onNext}></ol-button>
+      <ol-button
+        label="Continue"
+        primary
+        .disabled=${state.preferences.length === 0}
+        @button-click=${onNext}
+      ></ol-button>
     </div>
   </section>
 `;

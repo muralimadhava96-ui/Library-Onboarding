@@ -1,13 +1,14 @@
 # openlibrary-onboarding
 
-Starter Lit + Vite scaffold for an Open Library onboarding flow.
+Lit + Vite onboarding prototype for an Open Library-style flow.
 
 ## What is included
 
-- Component stubs for onboarding UI
-- Page scaffolds for each onboarding step
-- Service/store/util placeholders for integration
-- Unit test stubs for components and services
+- Component scaffolds with working placeholder interactions
+- Page flow across welcome -> preferences -> import -> recommendations -> home
+- Store + localStorage persistence wiring
+- Service/util modules ready for real API integration
+- Unit test scaffolds for components and services
 - Dockerfile and baseline lint/stylelint setup
 
 ## Quick start
@@ -18,6 +19,7 @@ npm run dev
 ```
 
 Open `http://localhost:5173`.
+The onboarding state persists in local storage between refreshes.
 
 ## Scripts
 

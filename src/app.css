@@ -31,6 +31,7 @@ body {
   display: flex;
   gap: 12px;
   margin-top: 24px;
+  flex-wrap: wrap;
 }
 
 .book-grid {
@@ -38,4 +39,10 @@ body {
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 16px;
   margin-top: 16px;
+}
+
+@media (width <= 640px) {
+  .page {
+    padding: 16px;
+  }
 }

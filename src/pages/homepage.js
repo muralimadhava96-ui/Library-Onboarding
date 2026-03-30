@@ -1,20 +1,37 @@
 import { html } from 'lit';
 import '../components/ol-book-card.js';
+import '../components/ol-button.js';
 
-const demoBooks = [
-  { title: 'The Left Hand of Darkness', author: 'Ursula K. Le Guin' },
-  { title: 'The Pragmatic Programmer', author: 'Hunt and Thomas' },
-  { title: 'Thinking, Fast and Slow', author: 'Daniel Kahneman' }
-];
+function pickDisplayBooks(state) {
+  if (state.recommendations.length) {
+    return state.recommendations;
+  }
 
-export const Homepage = ({ state }) => html`
+  if (state.importedBooks.length) {
+    return state.importedBooks;
+  }
+
+  return [];
+}
+
+export const Homepage = ({ state, onRestart }) => {
+  const books = pickDisplayBooks(state);
+
+  return html`
   <section class="page">
     <h2>Home</h2>
-    <p>Onboarding complete. Preferences selected: ${state.preferences.length || 0}.</p>
+    <p>Onboarding complete. Preferences selected: ${state.preferences.length}.</p>
+    <p>Imported books: ${state.importedBooks.length}. Recommendations: ${state.recommendations.length}.</p>
     <div class="book-grid">
-      ${demoBooks.map(
-        (book) => html`<ol-book-card .title=${book.title} .author=${book.author}></ol-book-card>`
-      )}
+      ${books.length
+        ? books.map(
+            (book) => html`<ol-book-card .title=${book.title} .author=${book.author || 'Unknown'}></ol-book-card>`
+          )
+        : html`<p>No books to display yet.</p>`}
+    </div>
+    <div class="page-actions">
+      <ol-button label="Restart onboarding" @button-click=${onRestart}></ol-button>
     </div>
   </section>
 `;
+};
