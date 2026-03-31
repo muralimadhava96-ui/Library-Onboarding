@@ -29,6 +29,13 @@ export class OlPreferenceSelector extends LitElement {
     );
   }
 
+  handleKeydown(event, pref) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.selectPreference(pref);
+    }
+  }
+
   static styles = css`
     .chip {
       display: inline-block;
@@ -56,7 +63,12 @@ export class OlPreferenceSelector extends LitElement {
           (opt) => html`
             <div
               class="chip ${this.preferences.includes(opt) ? 'selected' : ''}"
+              role="button"
+              tabindex="0"
+              aria-pressed="${this.preferences.includes(opt)}"
+              aria-label="Toggle ${opt} preference"
               @click=${() => this.selectPreference(opt)}
+              @keydown=${(event) => this.handleKeydown(event, opt)}
             >
               ${opt}
             </div>

@@ -1,5 +1,7 @@
 const initialState = {
   currentStep: 0,
+  theme: 'light',
+  highContrast: false,
   subjects: [],
   subjectsLoading: false,
   subjectsError: '',

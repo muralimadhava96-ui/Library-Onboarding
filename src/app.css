@@ -1,7 +1,32 @@
 :root {
+  --bg: #f8fafc;
+  --text: #1f2937;
+  --card-bg: #fff;
+  --border: #e5e7eb;
+  --button-bg: #fff;
+  --button-text: #1f2937;
+
   font-family: 'Avenir Next', 'Segoe UI', sans-serif;
-  color: #1f2937;
-  background-color: #f8fafc;
+  color: var(--text);
+  background-color: var(--bg);
+}
+
+:root[data-theme='dark'] {
+  --bg: #0f172a;
+  --text: #e2e8f0;
+  --card-bg: #111827;
+  --border: #334155;
+  --button-bg: #1e293b;
+  --button-text: #e2e8f0;
+}
+
+:root[data-contrast='high'] {
+  --bg: #fff;
+  --text: #000;
+  --card-bg: #fff;
+  --border: #000;
+  --button-bg: #fff;
+  --button-text: #000;
 }
 
 * {
@@ -10,19 +35,38 @@
 
 body {
   margin: 0;
+  background: var(--bg);
+  color: var(--text);
 }
 
 .app-shell {
   min-height: 100vh;
   display: grid;
-  place-items: center;
+  align-content: start;
   padding: 24px;
+  gap: 16px;
+}
+
+.app-toolbar {
+  width: min(960px, 100%);
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.toolbar-button {
+  border: 1px solid var(--border);
+  background: var(--button-bg);
+  color: var(--button-text);
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
 }
 
 .page {
   width: min(960px, 100%);
-  background: #fff;
-  border: 1px solid #e5e7eb;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
   border-radius: 16px;
   padding: 24px;
 }

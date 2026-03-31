@@ -54,6 +54,7 @@ export class OlButton extends LitElement {
     return html`
       <button
         class="${this.primary ? 'primary' : 'secondary'}"
+        aria-label="${this.label}"
         ?disabled=${this.disabled}
         @click=${this.handleClick}
       >

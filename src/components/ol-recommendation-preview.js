@@ -52,7 +52,7 @@ export class OlRecommendationPreview extends LitElement {
 
   render() {
     return html`
-      <div>
+      <div aria-live="polite">
         <p>Recommended books</p>
         ${this.renderState()}
         ${this.recommendations.length

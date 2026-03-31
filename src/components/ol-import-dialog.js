@@ -103,11 +103,12 @@ export class OlImportDialog extends LitElement {
         <textarea
           .value=${this.draft}
           @input=${this.updateDraft}
+          aria-label="Book titles input"
           placeholder="Dune&#10;The Hobbit&#10;Sapiens"
         ></textarea>
         <div class="actions">
-          <button @click=${this.importFromDraft}>Import list</button>
-          <button @click=${this.useSample}>Use sample books</button>
+          <button aria-label="Import book list" @click=${this.importFromDraft}>Import list</button>
+          <button aria-label="Use sample books" @click=${this.useSample}>Use sample books</button>
         </div>
         <p>Imported: ${this.importedCount}</p>
       </div>

@@ -22,7 +22,7 @@ export class OlOnboardingStep extends LitElement {
   `;
 
   render() {
-    return html`<p>Step ${this.step} of ${this.total}</p>`;
+    return html`<p aria-live="polite">Step ${this.step} of ${this.total}</p>`;
   }
 }
 

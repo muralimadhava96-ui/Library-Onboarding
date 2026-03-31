@@ -83,6 +83,20 @@ function fallbackRecommendations(preferences, importedBooks, limit) {
   }));
 }
 
+export function generateRecommendations(user) {
+  const interests = Array.isArray(user?.interests) ? user.interests : [];
+
+  if (interests.includes('history')) {
+    return ['Sapiens', 'Guns, Germs, and Steel'];
+  }
+
+  if (interests.includes('fantasy')) {
+    return ['The Hobbit', 'A Wizard of Earthsea'];
+  }
+
+  return ['The Great Gatsby', '1984'];
+}
+
 export async function fetchSubjects({ limit = 12 } = {}) {
   const url = `${API_BASE_URL}/subjects.json?limit=${limit}`;
 
@@ -212,10 +226,20 @@ export async function fetchRecommendations({ preferences = [], importedBooks = [
 
     return { preferences, limit, items };
   } catch (_error) {
+    const generated = generateRecommendations({ interests: preferences }).map((title, index) => ({
+      id: `GEN-${index + 1}`,
+      title,
+      author: 'Recommended',
+      subjects: [...preferences]
+    }));
+
     return {
       preferences,
       limit,
-      items: fallbackRecommendations(preferences, importedBooks, limit)
+      items: dedupeBooks([...generated, ...fallbackRecommendations(preferences, importedBooks, limit)], importedTitles).slice(
+        0,
+        limit
+      )
     };
   }
 }

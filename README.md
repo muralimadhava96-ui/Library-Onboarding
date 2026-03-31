@@ -1,61 +1,60 @@
 # Library-Onboarding
 
-Onboarding UX prototype for Open Library with real API integration.
+Onboarding UX prototype for Open Library with integration context, state/data flow, personalization logic, and accessibility-first design.
 
 ## Open Library Integration
 
 This project is designed to integrate into the Open Library frontend.
+
+### Integration Context
+
+- `/people` system: user profile context and preference ownership
+- `/subjects`: interest discovery and onboarding options
+- `/trending`: fallback recommendation source
 
 ### APIs Used
 
 - Subjects API: `https://openlibrary.org/subjects.json`
 - Search API: `https://openlibrary.org/search.json?q={query}`
 
-### Integration Plan
+### Mock Backend API Structure
 
-- Onboarding flow will be added after user signup.
-- Preferences are stored temporarily in `localStorage`.
-- Future: persist preferences via backend account storage.
+- `GET /api/user/preferences`
+- `POST /api/onboarding`
+- `GET /api/recommendations`
 
 ### Target Files (Open Library)
 
 - account/register page
 - homepage recommendation section
 
+Detailed notes:
+
+- [`docs/integration.md`](docs/integration.md)
+
 ## Architecture
 
 User -> Onboarding UI -> Preference Engine -> Open Library API -> Recommendation UI
 
-## Components
+Detailed architecture and state flow:
 
-- OnboardingFlow.vue (conceptual mapping: [`src/main.js`](src/main.js))
-- GenreSelector.vue (conceptual mapping: [`src/components/ol-preference-selector.js`](src/components/ol-preference-selector.js))
-- BookCard.vue (conceptual mapping: [`src/components/ol-book-card.js`](src/components/ol-book-card.js))
-- RecommendationEngine.js (implemented in [`src/services/api.js`](src/services/api.js))
-- ProgressBar.vue (conceptual mapping: [`src/components/ol-onboarding-step.js`](src/components/ol-onboarding-step.js))
+- [`docs/architecture.md`](docs/architecture.md)
 
-## Impact
+## State Handling / Data Flow
 
-- Improves onboarding experience
-- Increases user engagement
-- Enables personalized recommendations
-- Provides reusable UI components
+Store-driven onboarding state tracks progression, selected preferences, imported books, and recommendations.
 
-## State Handling
+Example state:
 
-State is managed in [`src/store/onboarding-store.js`](src/store/onboarding-store.js) with this shape:
-
-```js
-const state = {
-  preferences: [],
-  currentStep: 1,
-  recommendations: []
-};
+```json
+{
+  "interests": ["fiction", "history"],
+  "reading_goal": "casual",
+  "experience": "beginner"
+}
 ```
 
-The running implementation also tracks imported books, loading states, and completion flags.
-
-## Real API Call Example
+## Real API Call
 
 Implemented in [`src/services/api.js`](src/services/api.js):
 
@@ -67,9 +66,19 @@ async function fetchBooks(query) {
 }
 ```
 
-## Smart Feature
+## Smart Personalization Feature
 
-Implemented logic:
+Implemented intelligence:
+
+```js
+function generateRecommendations(user) {
+  if (user.interests.includes('history')) {
+    return ['Sapiens', 'Guns, Germs, and Steel'];
+  }
+}
+```
+
+Cold-start fallback:
 
 ```js
 if (state.preferences.length === 0) {
@@ -77,11 +86,68 @@ if (state.preferences.length === 0) {
 }
 ```
 
-This supports cold-start recommendations for first-time users.
+## Component Architecture
+
+Reusable component mindset (conceptual mapping):
+
+- OnboardingFlow.vue -> [`src/main.js`](src/main.js)
+- InterestSelector.jsx / GenreSelector.vue -> [`src/components/ol-preference-selector.js`](src/components/ol-preference-selector.js)
+- RecommendationCard.jsx / BookCard.vue -> [`src/components/ol-book-card.js`](src/components/ol-book-card.js)
+- ProgressIndicator.jsx / ProgressBar.vue -> [`src/components/ol-onboarding-step.js`](src/components/ol-onboarding-step.js)
+- RecommendationEngine.js -> [`src/services/api.js`](src/services/api.js)
+
+## Accessibility Features
+
+- Keyboard navigation for preference chips
+- ARIA labels on key controls
+- Screen reader updates via `aria-live`
+- Dark mode toggle
+- High contrast mode toggle
+
+## UX Decisions
+
+Rationale for step-based onboarding, progressive disclosure, and low-friction flow:
+
+- [`docs/ux-decisions.md`](docs/ux-decisions.md)
+
+## Impact
+
+- Improves onboarding experience
+- Increases user engagement
+- Enables personalized recommendations
+- Provides reusable UI components
+
+## GSoC Mapping
+
+This prototype directly supports:
+
+- Open Library onboarding redesign
+- Recommendation system UI
+- User personalization flows
+
+## Future Work
+
+- Connect with Open Library Subjects API at production scale
+- Expand personalized recommendation engine
+- Integrate user reading history and backend persistence
+- Add progressive enhancement for server-rendered templates
+
+## Mentor Hooks
+
+This implementation emphasizes:
+
+- scalability
+- modular design
+- accessibility
+- progressive enhancement
 
 ## Live Demo
 
 https://your-demo-link.vercel.app
+
+## Prototype Assets
+
+- Wireframes/screenshots: [`docs/wireframes`](docs/wireframes)
 
 ## Local Run
 
@@ -97,9 +163,3 @@ npm run lint
 npm run build
 npm run test
 ```
-
-## Additional Docs
-
-- Integration mapping details: [`docs/openlibrary-integration.md`](docs/openlibrary-integration.md)
-- Proposal draft: [`docs/selected-level-proposal.md`](docs/selected-level-proposal.md)
-- Prototype wireframes: [`docs/wireframes`](docs/wireframes)

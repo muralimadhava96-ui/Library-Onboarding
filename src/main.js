@@ -21,6 +21,11 @@ const pages = [WelcomePage, PreferencesPage, ImportBooksPage, RecommendationsPag
 let recommendationKey = '';
 let subjectsLoaded = false;
 
+function applyAppearance(state) {
+  document.documentElement.dataset.theme = state.theme === 'dark' ? 'dark' : 'light';
+  document.documentElement.dataset.contrast = state.highContrast ? 'high' : 'normal';
+}
+
 function getRecommendationKey(state) {
   return JSON.stringify({
     preferences: [...state.preferences].sort(),
@@ -90,6 +95,8 @@ function hydrateFromStorage() {
 
   onboardingStore.setState({
     currentStep: Number.isInteger(persisted.currentStep) ? Math.max(0, Math.min(persisted.currentStep, pages.length - 1)) : 0,
+    theme: persisted.theme === 'dark' ? 'dark' : 'light',
+    highContrast: Boolean(persisted.highContrast),
     subjects: Array.isArray(persisted.subjects) ? persisted.subjects : [],
     preferences: Array.isArray(persisted.preferences) ? persisted.preferences : [],
     importedBooks: Array.isArray(persisted.importedBooks) ? persisted.importedBooks : [],
@@ -102,9 +109,12 @@ function hydrateFromStorage() {
 function renderApp() {
   const state = onboardingStore.getState();
   const currentPage = pages[state.currentStep] ?? WelcomePage;
+  applyAppearance(state);
 
   const goNext = () => onboardingStore.setState({ currentStep: Math.min(state.currentStep + 1, pages.length - 1) });
   const goBack = () => onboardingStore.setState({ currentStep: Math.max(state.currentStep - 1, 0) });
+  const toggleTheme = () => onboardingStore.setState({ theme: state.theme === 'dark' ? 'light' : 'dark' });
+  const toggleContrast = () => onboardingStore.setState({ highContrast: !state.highContrast });
 
   if (state.currentStep === 1 && !state.subjects.length && !state.subjectsLoading) {
     loadSubjectsIfNeeded();
@@ -120,6 +130,14 @@ function renderApp() {
   render(
     html`
       <main class="app-shell">
+        <div class="app-toolbar" aria-label="Display settings">
+          <button class="toolbar-button" @click=${toggleTheme} aria-label="Toggle dark mode">
+            ${state.theme === 'dark' ? 'Use light mode' : 'Use dark mode'}
+          </button>
+          <button class="toolbar-button" @click=${toggleContrast} aria-label="Toggle high contrast mode">
+            ${state.highContrast ? 'Use normal contrast' : 'Use high contrast'}
+          </button>
+        </div>
         ${currentPage({
           state,
           onNext: goNext,
@@ -154,6 +172,8 @@ function renderApp() {
 onboardingStore.subscribe((state) => {
   saveOnboardingState({
     currentStep: state.currentStep,
+    theme: state.theme,
+    highContrast: state.highContrast,
     subjects: state.subjects,
     preferences: state.preferences,
     importedBooks: state.importedBooks,
