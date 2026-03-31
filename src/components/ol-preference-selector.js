@@ -4,12 +4,14 @@ const OPTIONS = ['Sci-Fi', 'Fantasy', 'History', 'Romance', 'Philosophy', 'Tech'
 
 export class OlPreferenceSelector extends LitElement {
   static properties = {
-    preferences: { type: Array }
+    preferences: { type: Array },
+    options: { type: Array }
   };
 
   constructor() {
     super();
     this.preferences = [];
+    this.options = [];
   }
 
   selectPreference(pref) {
@@ -46,9 +48,11 @@ export class OlPreferenceSelector extends LitElement {
   `;
 
   render() {
+    const options = this.options.length ? this.options : OPTIONS;
+
     return html`
       <div>
-        ${OPTIONS.map(
+        ${options.map(
           (opt) => html`
             <div
               class="chip ${this.preferences.includes(opt) ? 'selected' : ''}"

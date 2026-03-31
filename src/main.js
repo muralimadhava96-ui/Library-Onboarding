@@ -6,7 +6,7 @@ import './components/ol-preference-selector.js';
 import './components/ol-import-dialog.js';
 import './components/ol-recommendation-preview.js';
 import './components/ol-book-card.js';
-import { fetchRecommendations } from './services/api.js';
+import { fetchRecommendations, fetchSubjects } from './services/api.js';
 import { clearOnboardingState, loadOnboardingState, saveOnboardingState } from './services/storage.js';
 import { onboardingStore } from './store/onboarding-store.js';
 import { WelcomePage } from './pages/welcome-page.js';
@@ -19,6 +19,7 @@ const root = document.getElementById('app');
 const pages = [WelcomePage, PreferencesPage, ImportBooksPage, RecommendationsPage, Homepage];
 
 let recommendationKey = '';
+let subjectsLoaded = false;
 
 function getRecommendationKey(state) {
   return JSON.stringify({
@@ -59,6 +60,28 @@ async function refreshRecommendations() {
   }
 }
 
+async function loadSubjectsIfNeeded() {
+  const state = onboardingStore.getState();
+
+  if (subjectsLoaded || state.subjectsLoading || state.subjects.length) {
+    subjectsLoaded = true;
+    return;
+  }
+
+  onboardingStore.setState({ subjectsLoading: true, subjectsError: '' });
+
+  try {
+    const subjects = await fetchSubjects({ limit: 12 });
+    onboardingStore.setState({ subjects, subjectsLoading: false });
+    subjectsLoaded = true;
+  } catch (error) {
+    onboardingStore.setState({
+      subjectsLoading: false,
+      subjectsError: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+}
+
 function hydrateFromStorage() {
   const persisted = loadOnboardingState();
   if (!persisted || typeof persisted !== 'object') {
@@ -67,11 +90,13 @@ function hydrateFromStorage() {
 
   onboardingStore.setState({
     currentStep: Number.isInteger(persisted.currentStep) ? Math.max(0, Math.min(persisted.currentStep, pages.length - 1)) : 0,
+    subjects: Array.isArray(persisted.subjects) ? persisted.subjects : [],
     preferences: Array.isArray(persisted.preferences) ? persisted.preferences : [],
     importedBooks: Array.isArray(persisted.importedBooks) ? persisted.importedBooks : [],
     recommendations: Array.isArray(persisted.recommendations) ? persisted.recommendations : [],
     onboardingComplete: Boolean(persisted.onboardingComplete)
   });
+  subjectsLoaded = Array.isArray(persisted.subjects) && persisted.subjects.length > 0;
 }
 
 function renderApp() {
@@ -80,6 +105,10 @@ function renderApp() {
 
   const goNext = () => onboardingStore.setState({ currentStep: Math.min(state.currentStep + 1, pages.length - 1) });
   const goBack = () => onboardingStore.setState({ currentStep: Math.max(state.currentStep - 1, 0) });
+
+  if (state.currentStep === 1 && !state.subjects.length && !state.subjectsLoading) {
+    loadSubjectsIfNeeded();
+  }
 
   if (state.currentStep === 3 && !state.recommendationsLoading) {
     const nextKey = getRecommendationKey(state);
@@ -111,6 +140,7 @@ function renderApp() {
           onComplete: () => onboardingStore.setState({ onboardingComplete: true }),
           onRestart: () => {
             recommendationKey = '';
+            subjectsLoaded = false;
             clearOnboardingState();
             onboardingStore.reset();
           }
@@ -124,6 +154,7 @@ function renderApp() {
 onboardingStore.subscribe((state) => {
   saveOnboardingState({
     currentStep: state.currentStep,
+    subjects: state.subjects,
     preferences: state.preferences,
     importedBooks: state.importedBooks,
     recommendations: state.recommendations,

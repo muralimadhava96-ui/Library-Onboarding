@@ -1,5 +1,8 @@
 const initialState = {
   currentStep: 0,
+  subjects: [],
+  subjectsLoading: false,
+  subjectsError: '',
   preferences: [],
   importedBooks: [],
   recommendations: [],
