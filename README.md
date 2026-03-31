@@ -1,6 +1,6 @@
 # Library-Onboarding
 
-Onboarding UX prototype for Open Library with real API integration and mentor-style implementation notes.
+Onboarding UX prototype for Open Library with real API integration.
 
 ## Open Library Integration
 
