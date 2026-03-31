@@ -1,70 +1,44 @@
-# openlibrary-onboarding
+# Library-Onboarding
 
-Mentor-ready onboarding UX prototype for Open Library with a real integration layer and implementation mapping.
+Mentor-format implementation repo for an Open Library onboarding improvement project.
 
-## Quick Start
+## 1. Open Library Integration Layer
 
-```bash
-npm install
-npm run dev
-```
+Implemented in [`src/services/api.js`](src/services/api.js):
 
-Open `http://localhost:5173`.
+- Subjects:
+  - `GET https://openlibrary.org/subjects.json?limit={n}`
+- Recommendations:
+  - `GET https://openlibrary.org/subjects/{subject}.json?limit={n}&details=true`
+  - `GET https://openlibrary.org/search.json?q={query}&limit={n}`
+- Book details:
+  - `GET https://openlibrary.org/works/{workId}.json`
 
-## Scripts
+Fallback strategy:
 
-- `npm run dev` - start Vite dev server
-- `npm run build` - production build
-- `npm run preview` - preview production build
-- `npm run lint` - run ESLint
-- `npm run lint:css` - run Stylelint
-- `npm run test` - run unit tests
+- API failure -> local fallback catalog.
+- Cold start (`preferences.length === 0`) -> popular books fallback.
+- Imported titles are filtered from recommendation output.
 
-If browser tests fail on first run, install Playwright browser binaries:
+Persistence:
 
-```bash
-npx playwright install
-```
+- Local state stored in `localStorage` via [`src/services/storage.js`](src/services/storage.js).
 
-## Open Library Integration Plan
-
-Current prototype already integrates Open Library APIs through [`src/services/api.js`](src/services/api.js):
-
-- Subjects source:
-  - `https://openlibrary.org/subjects.json?limit={n}`
-- Recommendations source:
-  - `https://openlibrary.org/subjects/{subject}.json?limit={n}&details=true`
-  - `https://openlibrary.org/search.json?q={query}&limit={n}`
-- Book detail source:
-  - `https://openlibrary.org/works/{workId}.json`
-
-Fallback behavior for reliability:
-
-- If API calls fail, use local curated fallback subjects/books.
-- Cold-start flow (no preferences selected) returns popular books via a fiction fallback.
-- Imported titles are filtered out from recommendations.
-
-State persistence:
-
-- User onboarding state is stored in `localStorage` via [`src/services/storage.js`](src/services/storage.js).
-- Persisted fields: step, subjects, preferences, imported books, recommendations, completion flag.
-
-## Architecture
+## 2. Architecture
 
 ```mermaid
 flowchart LR
-  U[User] --> UI[Onboarding UI]
-  UI --> S[Onboarding Store]
-  S --> PE[Preference + Recommendation Engine]
-  PE --> API[Open Library APIs]
-  API --> PE
-  PE --> UI
-  S --> LS[localStorage]
+  User --> OnboardingUI
+  OnboardingUI --> Store
+  Store --> RecommendationEngine
+  RecommendationEngine --> OpenLibraryAPI
+  Store --> LocalStorage
+  RecommendationEngine --> OnboardingUI
 ```
 
-## Component and File Mapping
+## 3. Components
 
-Core UI modules:
+UI components:
 
 - [`src/components/ol-preference-selector.js`](src/components/ol-preference-selector.js)
 - [`src/components/ol-import-dialog.js`](src/components/ol-import-dialog.js)
@@ -73,43 +47,70 @@ Core UI modules:
 - [`src/components/ol-onboarding-step.js`](src/components/ol-onboarding-step.js)
 - [`src/components/ol-button.js`](src/components/ol-button.js)
 
-Flow controller and state:
+Flow/state:
 
 - [`src/main.js`](src/main.js)
 - [`src/store/onboarding-store.js`](src/store/onboarding-store.js)
 
-Proposed Open Library integration touchpoints:
+Pages:
 
-- `openlibrary/templates/account/register.html` (replace/augment sign-up onboarding region)
-- `openlibrary/templates/home/index.html` (post-onboarding recommendation entry points)
-- Frontend JS bundle entry where onboarding bootstrap is initialized
+- [`src/pages/welcome-page.js`](src/pages/welcome-page.js)
+- [`src/pages/preferences-page.js`](src/pages/preferences-page.js)
+- [`src/pages/import-books-page.js`](src/pages/import-books-page.js)
+- [`src/pages/recommendations-page.js`](src/pages/recommendations-page.js)
+- [`src/pages/homepage.js`](src/pages/homepage.js)
 
-Detailed mapping notes are in [`docs/openlibrary-integration.md`](docs/openlibrary-integration.md).
+## 4. Feature Depth
 
-## Data Flow and Edge Cases
+Implemented depth expected by mentors:
 
-Data flow summary:
+- Dynamic subject loading from Open Library.
+- Preference-aware recommendations.
+- Cold-start recommendation path.
+- Multi-source fallback (subject -> search -> popular -> local fallback).
+- Deduplication and imported-title filtering.
+- Persisted onboarding state.
 
-1. Preferences step loads subjects from Open Library.
-2. User-selected preferences + imported books are stored in store and persisted.
-3. Recommendations step fetches ranked books from subject/search APIs.
-4. Homepage displays recommended or imported books.
+## 5. Open Library File Mapping (Proposed)
 
-Handled edge cases:
+Integration touchpoints:
 
-- No preferences: use popular books fallback.
-- API failure/timeouts: switch to local fallback catalog.
-- Duplicate titles: deduplicated before rendering.
-- Imported titles in recommendations: filtered out.
+- `openlibrary/templates/account/register.html`
+- `openlibrary/templates/home/index.html`
+- Frontend JS entry where account/onboarding bootstrap is initialized
 
-## Why This Matters to Open Library
+Detailed notes:
 
-- Reduces new-user friction during sign-up.
-- Improves first-session book discovery.
-- Provides a clear extension point for personalization.
-- Aligns with Open Library mission: accessible and engaging reading for everyone.
+- [`docs/openlibrary-integration.md`](docs/openlibrary-integration.md)
 
-## Demo Assets
+## 6. Why This Matters to Open Library
 
-Prototype wireframes/screenshots are in [`docs/wireframes`](docs/wireframes).
+- Reduces drop-off at first account experience.
+- Improves immediate book discovery quality.
+- Increases engagement for new users.
+- Keeps discovery aligned with Open Library accessibility goals.
 
+## 7. Demo and Prototype Assets
+
+- Wireframes/screenshots:
+  - [`docs/wireframes`](docs/wireframes)
+
+## 8. Proposal-Ready Doc
+
+- GSoC proposal format draft:
+  - [`docs/selected-level-proposal.md`](docs/selected-level-proposal.md)
+
+## Development
+
+```bash
+npm install
+npm run dev
+```
+
+Verification:
+
+```bash
+npm run lint
+npm run build
+npm run test
+```
