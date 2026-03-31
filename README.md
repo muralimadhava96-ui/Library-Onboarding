@@ -25,7 +25,7 @@ This project is designed to integrate into the Open Library frontend.
 
 ## System Architecture
 
-![Architecture Diagram](./assets/architecture-diagram.png)
+![Architecture Diagram](assets/architecture-diagram.png)
 
 ### Target Files (Open Library)
 
