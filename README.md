@@ -23,6 +23,10 @@ This project is designed to integrate into the Open Library frontend.
 - `POST /api/onboarding`
 - `GET /api/recommendations`
 
+## System Architecture
+
+![Architecture Diagram](./assets/architecture-diagram.png)
+
 ### Target Files (Open Library)
 
 - account/register page
@@ -109,6 +113,16 @@ Reusable component mindset (conceptual mapping):
 Rationale for step-based onboarding, progressive disclosure, and low-friction flow:
 
 - [`docs/ux-decisions.md`](docs/ux-decisions.md)
+
+## Design to Frontend Mapping
+
+| Figma Component | Frontend Equivalent |
+|----------------|--------------------|
+| Button         | Reusable UI Button |
+| Chip           | Filter Component   |
+| Book Card      | Book Display Card  |
+| Progress Bar   | Step Indicator     |
+
 
 ## Impact
 
