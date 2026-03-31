@@ -1,116 +1,105 @@
 # Library-Onboarding
 
-Mentor-format implementation repo for an Open Library onboarding improvement project.
+Onboarding UX prototype for Open Library with real API integration and mentor-style implementation notes.
 
-## 1. Open Library Integration Layer
+## Open Library Integration
+
+This project is designed to integrate into the Open Library frontend.
+
+### APIs Used
+
+- Subjects API: `https://openlibrary.org/subjects.json`
+- Search API: `https://openlibrary.org/search.json?q={query}`
+
+### Integration Plan
+
+- Onboarding flow will be added after user signup.
+- Preferences are stored temporarily in `localStorage`.
+- Future: persist preferences via backend account storage.
+
+### Target Files (Open Library)
+
+- account/register page
+- homepage recommendation section
+
+## Architecture
+
+User -> Onboarding UI -> Preference Engine -> Open Library API -> Recommendation UI
+
+## Components
+
+- OnboardingFlow.vue (conceptual mapping: [`src/main.js`](src/main.js))
+- GenreSelector.vue (conceptual mapping: [`src/components/ol-preference-selector.js`](src/components/ol-preference-selector.js))
+- BookCard.vue (conceptual mapping: [`src/components/ol-book-card.js`](src/components/ol-book-card.js))
+- RecommendationEngine.js (implemented in [`src/services/api.js`](src/services/api.js))
+- ProgressBar.vue (conceptual mapping: [`src/components/ol-onboarding-step.js`](src/components/ol-onboarding-step.js))
+
+## Impact
+
+- Improves onboarding experience
+- Increases user engagement
+- Enables personalized recommendations
+- Provides reusable UI components
+
+## State Handling
+
+State is managed in [`src/store/onboarding-store.js`](src/store/onboarding-store.js) with this shape:
+
+```js
+const state = {
+  preferences: [],
+  currentStep: 1,
+  recommendations: []
+};
+```
+
+The running implementation also tracks imported books, loading states, and completion flags.
+
+## Real API Call Example
 
 Implemented in [`src/services/api.js`](src/services/api.js):
 
-- Subjects:
-  - `GET https://openlibrary.org/subjects.json?limit={n}`
-- Recommendations:
-  - `GET https://openlibrary.org/subjects/{subject}.json?limit={n}&details=true`
-  - `GET https://openlibrary.org/search.json?q={query}&limit={n}`
-- Book details:
-  - `GET https://openlibrary.org/works/{workId}.json`
-
-Fallback strategy:
-
-- API failure -> local fallback catalog.
-- Cold start (`preferences.length === 0`) -> popular books fallback.
-- Imported titles are filtered from recommendation output.
-
-Persistence:
-
-- Local state stored in `localStorage` via [`src/services/storage.js`](src/services/storage.js).
-
-## 2. Architecture
-
-```mermaid
-flowchart LR
-  User --> OnboardingUI
-  OnboardingUI --> Store
-  Store --> RecommendationEngine
-  RecommendationEngine --> OpenLibraryAPI
-  Store --> LocalStorage
-  RecommendationEngine --> OnboardingUI
+```js
+async function fetchBooks(query) {
+  const res = await fetch(`https://openlibrary.org/search.json?q=${query}`);
+  const data = await res.json();
+  return data.docs.slice(0, 10);
+}
 ```
 
-## 3. Components
+## Smart Feature
 
-UI components:
+Implemented logic:
 
-- [`src/components/ol-preference-selector.js`](src/components/ol-preference-selector.js)
-- [`src/components/ol-import-dialog.js`](src/components/ol-import-dialog.js)
-- [`src/components/ol-recommendation-preview.js`](src/components/ol-recommendation-preview.js)
-- [`src/components/ol-book-card.js`](src/components/ol-book-card.js)
-- [`src/components/ol-onboarding-step.js`](src/components/ol-onboarding-step.js)
-- [`src/components/ol-button.js`](src/components/ol-button.js)
+```js
+if (state.preferences.length === 0) {
+  return fetchBooks('popular');
+}
+```
 
-Flow/state:
+This supports cold-start recommendations for first-time users.
 
-- [`src/main.js`](src/main.js)
-- [`src/store/onboarding-store.js`](src/store/onboarding-store.js)
+## Live Demo
 
-Pages:
+https://your-demo-link.vercel.app
 
-- [`src/pages/welcome-page.js`](src/pages/welcome-page.js)
-- [`src/pages/preferences-page.js`](src/pages/preferences-page.js)
-- [`src/pages/import-books-page.js`](src/pages/import-books-page.js)
-- [`src/pages/recommendations-page.js`](src/pages/recommendations-page.js)
-- [`src/pages/homepage.js`](src/pages/homepage.js)
-
-## 4. Feature Depth
-
-Implemented depth expected by mentors:
-
-- Dynamic subject loading from Open Library.
-- Preference-aware recommendations.
-- Cold-start recommendation path.
-- Multi-source fallback (subject -> search -> popular -> local fallback).
-- Deduplication and imported-title filtering.
-- Persisted onboarding state.
-
-## 5. Open Library File Mapping (Proposed)
-
-Integration touchpoints:
-
-- `openlibrary/templates/account/register.html`
-- `openlibrary/templates/home/index.html`
-- Frontend JS entry where account/onboarding bootstrap is initialized
-
-Detailed notes:
-
-- [`docs/openlibrary-integration.md`](docs/openlibrary-integration.md)
-
-## 6. Why This Matters to Open Library
-
-- Reduces drop-off at first account experience.
-- Improves immediate book discovery quality.
-- Increases engagement for new users.
-- Keeps discovery aligned with Open Library accessibility goals.
-
-## 7. Demo and Prototype Assets
-
-- Wireframes/screenshots:
-  - [`docs/wireframes`](docs/wireframes)
-
-## 8. Proposal-Ready Doc
-
-- GSoC proposal format draft:
-  - [`docs/selected-level-proposal.md`](docs/selected-level-proposal.md)
-
-## Development
+## Local Run
 
 ```bash
 npm install
 npm run dev
 ```
 
-Verification:
+## Validation
 
 ```bash
 npm run lint
 npm run build
 npm run test
 ```
+
+## Additional Docs
+
+- Integration mapping details: [`docs/openlibrary-integration.md`](docs/openlibrary-integration.md)
+- Proposal draft: [`docs/selected-level-proposal.md`](docs/selected-level-proposal.md)
+- Prototype wireframes: [`docs/wireframes`](docs/wireframes)

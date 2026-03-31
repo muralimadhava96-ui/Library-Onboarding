@@ -111,17 +111,36 @@ async function fetchSubjectWorks(subject, limit = 8) {
 }
 
 async function fetchSearchBooks(query, limit = 8) {
-  const encodedQuery = encodeURIComponent(query);
-  const url = `${API_BASE_URL}/search.json?q=${encodedQuery}&limit=${limit}`;
-  const data = await safeFetchJson(url);
-  const docs = Array.isArray(data?.docs) ? data.docs : [];
+  return fetchBooks(query, limit);
+}
 
-  return docs.map((item) => ({
-    id: item?.key?.replace('/works/', '') || item?.cover_edition_key || '',
-    title: item?.title || 'Untitled',
-    author: Array.isArray(item?.author_name) && item.author_name.length ? item.author_name[0] : 'Unknown',
-    subjects: []
-  }));
+export async function fetchBooks(query, limit = 10) {
+  try {
+    const encodedQuery = encodeURIComponent(query);
+    const url = `${API_BASE_URL}/search.json?q=${encodedQuery}&limit=${limit}`;
+    const data = await safeFetchJson(url);
+    const docs = Array.isArray(data?.docs) ? data.docs : [];
+
+    const books = docs.map((item) => ({
+      id: item?.key?.replace('/works/', '') || item?.cover_edition_key || '',
+      title: item?.title || 'Untitled',
+      author: Array.isArray(item?.author_name) && item.author_name.length ? item.author_name[0] : 'Unknown',
+      subjects: []
+    }));
+
+    if (!books.length) {
+      throw new Error('No books returned');
+    }
+
+    return books.slice(0, limit);
+  } catch (_error) {
+    return CATALOG.slice(0, limit).map((book) => ({
+      id: book.id,
+      title: book.title,
+      author: book.author,
+      subjects: [...book.subjects]
+    }));
+  }
 }
 
 export async function fetchPopularBooks(limit = 6) {
@@ -170,7 +189,7 @@ export async function fetchRecommendations({ preferences = [], importedBooks = [
   const importedTitles = new Set(importedBooks.map((book) => (book.title || '').toLowerCase()).filter(Boolean));
 
   if (!preferences.length) {
-    const items = await fetchPopularBooks(limit);
+    const items = await fetchBooks('popular', limit);
     return { preferences, limit, items: dedupeBooks(items, importedTitles).slice(0, limit) };
   }
 
